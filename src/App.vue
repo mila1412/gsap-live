@@ -1,47 +1,40 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import { ref, onMounted } from 'vue';
+import gsap from 'gsap';
+const logo = ref(null);
+onMounted(() => {
+  // gsap.to(logo.value, 1, {
+  //   y: 200,
+  //   rotate: 360,
+  //   yoyo: true,
+  //   repeat: 2
+  // });
+
+  //WITH Timelines
+  var tl = gsap.timeline({ repeat: 2, repeatDelay: 1 });
+  tl.to(logo.value, { x: 100, duration: 1 });
+  tl.to(logo.value, { y: 50, duration: 1 });
+  tl.to(logo.value, { opacity: 0, duration: 1 });
+});
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <img ref="logo" alt="Vue logo" src="./assets/logo.svg" width="125" height="125" />
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
+<style>
+html,
+body {
+  background-color: #333;
+  display: flex;
+  justify-content: center;
+  align-content: center;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+#app {
+  width: 390px;
+  height: 744px;
+  text-align: center;
+  margin-top: 60px;
+  background-color: #fff;
 }
 </style>
