@@ -97,7 +97,7 @@ const addEmoji = (emoji) => {
 let objCopy = {
   name: 'Mila',
   content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  number: 0
+  id: 0
 };
 const message = ref('');
 const commentList = reactive([]);
@@ -107,13 +107,17 @@ const addComment = () => {
   objCopy = { ...objCopy };
   if (message.value) {
     objCopy.content = message.value;
-    objCopy.number++;
+    objCopy.id++;
     commentList.push(objCopy);
   }
   message.value = '';
 };
-const deleteComment = (comment) => {
-  comment.delete = true;
+const deleteComment = (id) => {
+  let removeId = commentList.findIndex((comment) => comment.id === id);
+  commentList.splice(removeId, 1);
+
+  // 也可以用 filter，但是 reactive 無法整包替換，要改用 ref
+  // commentList.value = commentList.value.filter((comment) => comment.id !== id);
 };
 </script>
 
@@ -135,16 +139,17 @@ const deleteComment = (comment) => {
       <input type="text" v-model="message" @keyup.enter="addComment" />
       <button class="add-btn" @click="addComment">Add Comment</button>
     </div>
-    <div class="comment-list" v-for="(comment, id) in commentList" :key="id">
-      <template v-if="!comment.delete">
+    <TransitionGroup name="fade">
+      <div class="comment-list" v-for="comment in commentList" :key="comment.id">
         <div class="head"></div>
         <div class="content">
-          <div class="name">{{ comment.name + comment.number }}</div>
+          <div class="name">{{ comment.name + comment.id }}</div>
           <div class="message">{{ comment.content }}</div>
         </div>
-        <button class="btn" @click="deleteComment(comment)">delete</button>
-      </template>
-    </div>
+        <button class="btn" @click="deleteComment(comment.id)">delete</button>
+      </div>
+    </TransitionGroup>
+
     <ul class="current-list">
       <li v-for="(emoji, index) in currentList" :key="index" :class="`emoji_${index}`">
         {{ emoji }}
@@ -238,6 +243,23 @@ body {
     }
     .btn {
       margin: 10px;
+    }
+
+    &.fade-enter-active,
+    &.fade-leave-active {
+      transition: all 1s;
+    }
+
+    &.fade-enter-from,
+    &.fade-leave-to {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    &.fade-enter-to,
+    &.fade-leave-from {
+      opacity: 1;
+      transform: translateY(0px);
     }
   }
   .current-list li {
