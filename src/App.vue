@@ -4,36 +4,6 @@ import gsap from 'gsap';
 const logo = ref(null);
 const myVideo = ref(null);
 const live = ref(null);
-const time = ref(0);
-
-setInterval(() => {
-  time.value++;
-}, 1000);
-
-const timeLabel = computed(() => {
-  let second = time.value % 60;
-  let minute = Math.floor(time.value / 60) % 60;
-  let hour = Math.floor(time.value / 3600) % 24;
-  let pd = (num) => (num + '').padStart(2, '0');
-
-  return `${pd(hour)}:${pd(minute)}:${pd(second)}`;
-});
-
-const emojiList = reactive(['😊', '😂', '😍', '❤', '😢']);
-const currentList = reactive([]);
-
-const addEmoji = (emoji) => {
-  currentList.push(emoji);
-  nextTick(() => {
-    let tl = gsap.timeline();
-    let _id = `.emoji_${currentList.length - 1}`;
-    tl.to(_id, 2, {
-      y: -200
-    }).to(_id, 2, {
-      x: -500
-    });
-  });
-};
 
 onMounted(() => {
   // gsap.to(logo.value, 1, {
@@ -90,6 +60,61 @@ onMounted(() => {
   let constraints = { audio: true, video: { width: 1280, height: 720 } };
   getMedia(constraints);
 });
+
+const time = ref(0);
+setInterval(() => {
+  time.value++;
+}, 1000);
+const timeLabel = computed(() => {
+  let second = time.value % 60;
+  let minute = Math.floor(time.value / 60) % 60;
+  let hour = Math.floor(time.value / 3600) % 24;
+  let pd = (num) => (num + '').padStart(2, '0');
+
+  return `${pd(hour)}:${pd(minute)}:${pd(second)}`;
+});
+
+const emojiList = reactive(['😊', '😂', '😍', '❤', '😢']);
+const currentList = reactive([]);
+const addEmoji = (emoji) => {
+  currentList.push(emoji);
+  nextTick(() => {
+    let tl = gsap.timeline();
+    let _id = `.emoji_${currentList.length - 1}`;
+    tl.set(_id, { scale: 0.2, x: Math.random() * -100 + 20 });
+    tl.to(_id, 1, {
+      y: -200 + Math.random() * -100,
+      scale: 1,
+      ease: 'power4.out'
+    }).to(_id, 2, {
+      x: -500,
+      scale: 0.8,
+      ease: 'power1.in'
+    });
+  });
+};
+
+let objCopy = {
+  name: 'Mila',
+  content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+  number: 0
+};
+const message = ref('');
+const commentList = reactive([]);
+const addComment = () => {
+  // 重新拷貝一份轉換為個別物件
+  // objCopy = JSON.parse(JSON.stringify(objCopy));
+  objCopy = { ...objCopy };
+  if (message.value) {
+    objCopy.content = message.value;
+    objCopy.number++;
+    commentList.push(objCopy);
+  }
+  message.value = '';
+};
+const deleteComment = (comment) => {
+  comment.delete = true;
+};
 </script>
 
 <template>
@@ -106,6 +131,20 @@ onMounted(() => {
     </ul>
   </div>
   <div class="comment-container">
+    <div class="comment-btn">
+      <input type="text" v-model="message" @keyup.enter="addComment" />
+      <button class="add-btn" @click="addComment">Add Comment</button>
+    </div>
+    <div class="comment-list" v-for="(comment, id) in commentList" :key="id">
+      <template v-if="!comment.delete">
+        <div class="head"></div>
+        <div class="content">
+          <div class="name">{{ comment.name + comment.number }}</div>
+          <div class="message">{{ comment.content }}</div>
+        </div>
+        <button class="btn" @click="deleteComment(comment)">delete</button>
+      </template>
+    </div>
     <ul class="current-list">
       <li v-for="(emoji, index) in currentList" :key="index" :class="`emoji_${index}`">
         {{ emoji }}
@@ -125,11 +164,11 @@ body {
 }
 #app {
   width: 390px;
-  height: 744px;
   text-align: center;
   margin-top: 60px;
   background-color: #fff;
   position: relative;
+  overflow-x: hidden;
 }
 .video-container {
   display: flex;
@@ -162,7 +201,7 @@ body {
       width: 50px;
       font-size: 30px;
       cursor: pointer;
-      // 去程 & 回程動畫所需時間
+      // 去程(點下去) & 回程(放開)所需時間
       transition: 1s;
       &:active {
         // 去程動畫所需時間，沒設會跟上面的 transition 一樣秒數
@@ -174,6 +213,33 @@ body {
 }
 .comment-container {
   position: relative;
+  overflow-y: auto;
+  height: 300px;
+  .comment-btn {
+    padding-top: 10px;
+  }
+  .comment-list {
+    display: flex;
+    align-items: center;
+    .head {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #000;
+      margin: 10px;
+    }
+    .content {
+      font-size: 14px;
+      flex: 1;
+      text-align: left;
+      .name {
+        margin-bottom: 5px;
+      }
+    }
+    .btn {
+      margin: 10px;
+    }
+  }
   .current-list li {
     position: absolute;
     top: 50px;
