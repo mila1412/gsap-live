@@ -202,6 +202,8 @@ body {
     right: 0;
     display: flex;
     list-style: none;
+    cursor: pointer;
+    z-index: 1;
     li {
       width: 50px;
       font-size: 30px;
@@ -218,7 +220,6 @@ body {
 }
 .comment-container {
   position: relative;
-  overflow-y: auto;
   height: 300px;
   .comment-btn {
     padding-top: 10px;
